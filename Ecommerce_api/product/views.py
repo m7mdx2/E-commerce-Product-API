@@ -1,81 +1,129 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Product , Order , Review , Category 
-from .serializers import ProductSerializer , UserSerializer , OrderSerializer , ReviewSerializer , CategorySerializer
+from .models import Product, Order, Review, Category
+from .serializers import (
+    ProductSerializer,
+    UserSerializer,
+    OrderSerializer,
+    ReviewSerializer,
+)
 from django.contrib.auth.models import User
-from rest_framework import filters
-from rest_framework.permissions import IsAuthenticated , IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.authentication import TokenAuthentication
 from django_filters import rest_framework as django_filters
 from rest_framework_simplejwt.authentication import JWTAuthentication
-class UserViewSet(viewsets.ModelViewSet): # this view for handeling user creation and updatation and crud
-    authentication_classes = [JWTAuthentication]
+
+
+# --------------------
+# USER VIEWSET
+# --------------------
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for users. Only authenticated users can view, update or delete a user,
+    but anyone can create a new account (POST action).
+    """
+
+    authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can interact with user
+    permission_classes = [
+        IsAuthenticated
+    ]  # Only authenticated users can perform other actions
+
     def get_permissions(self):
         # Allow non-authenticated users to create an account (POST)
-        if self.action == 'create':
-            return []
-        return [IsAuthenticated()]  # Require authentication for other actions (view, update, delete)
+        if self.action == "create":
+            return []  # No authentication required for user registration
+        return [
+            IsAuthenticated()
+        ]  # Require authentication for other actions (view, update, delete)
 
-class ProductViewSet(viewsets.ModelViewSet):
-    authentication_classes = [JWTAuthentication] # i added authenticaytion classes fielde to insure token based auth
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = Product.objects.all() 
-    serializer_class = ProductSerializer
-    filter_backends = (django_filters.DjangoFilterBackend, filters.SearchFilter) # ADDING SEARCH FUNCTIONALITY example (GET /products/?search=laptop)
-    search_fields = ['name', 'category'] # ADDING SEARCH FUNCTIONALITY
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        # You can further customize queryset here if needed
-        return queryset
-# API Endpoints for Products:
 
-# Retrieve List of Products:
-
-#     GET /products/
-#     Retrieves all products with optional filters:
-
-#     Filters:
-#         Category: ?category=<category_id>
-#         Price Range: ?min_price=<value>&max_price=<value>
-#         In Stock: ?in_stock=True to check if the product has stock.
-
-# Retrieve Individual Product:
-
-#     GET /products/{id}/
-#     Retrieves details of a specific product by its ID.
+# --------------------
+# PRODUCT FILTER
+# --------------------
 class ProductFilter(django_filters.FilterSet):
-    min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
-    max_price = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
-    category = django_filters.ModelChoiceFilter(queryset=Category.objects.all())  # Assuming Category is another model
-    in_stock = django_filters.BooleanFilter(field_name='stock_quantity', lookup_expr='gt', label='In Stock')
+    """
+    Filters for products based on price range, category, and stock status.
+    """
+
+    min_price = django_filters.NumberFilter(
+        field_name="price", lookup_expr="gte"
+    )  # Minimum price filter
+    max_price = django_filters.NumberFilter(
+        field_name="price", lookup_expr="lte"
+    )  # Maximum price filter
+    category = django_filters.ModelChoiceFilter(
+        queryset=Category.objects.all()
+    )  # Filter by category
+    in_stock = django_filters.BooleanFilter(
+        field_name="stock_quantity", lookup_expr="gt", label="In Stock"
+    )  # Filter products that are in stock
 
     class Meta:
         model = Product
-        fields = ['category', 'min_price', 'max_price', 'in_stock']
+        fields = ["category", "min_price", "max_price", "in_stock"]
 
-class OrderViewSet(viewsets.ModelViewSet):
-    authentication_classes = [TokenAuthentication]
-    queryset = Order.objects.all()
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated users can interact with order
+
+# --------------------
+# PRODUCT VIEWSET
+# --------------------
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for products. Provides token-based authentication and allows read-only access to unauthenticated users.
+    Implements search functionality by product name and category.
+    """
+
+    authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
+    permission_classes = [
+        IsAuthenticatedOrReadOnly
+    ]  # Read-only access for unauthenticated users
+    queryset = Product.objects.all()  # Order by a specific field, e.g., 'id'
+    serializer_class = ProductSerializer
+    search_fields = ["name", "category"]  # Allows search by product name and category
+    filterset_class = ProductFilter  # Apply product filter
 
     def get_queryset(self):
-        # Allow users to see only their own orders
-        if self.request.user.is_staff:  # Admin users can see all orders
+        queryset = super().get_queryset()
+        return queryset
+
+# --------------------
+# ORDER VIEWSET
+# --------------------
+class OrderViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for orders. Only authenticated users can view or interact with their orders.
+    Admin users can view all orders.
+    """
+    authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can perform any actions
+
+    def get_queryset(self):
+        """
+        Allow users to see only their own orders. Admin users can see all orders.
+        """
+        if self.request.user.is_staff:
             return Order.objects.all()
         return Order.objects.filter(user=self.request.user)
+
+# --------------------
+# REVIEW VIEWSET
+# --------------------
 class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    Handles CRUD operations for reviews. Only authenticated users can post a review, and the user who created the review is automatically assigned.
+    """
+
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [
+        IsAuthenticated
+    ]  # Only authenticated users can perform actions
 
     def perform_create(self, serializer):
+        """
+        Automatically assign the user who created the review.
+        """
         serializer.save(user=self.request.user)
-class CategoryViewSet(viewsets.ModelViewSet):
-    authentication_classes = [JWTAuthentication] 
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
