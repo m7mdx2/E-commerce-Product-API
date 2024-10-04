@@ -18,11 +18,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 # USER VIEWSET
 # --------------------
 class UserViewSet(viewsets.ModelViewSet):
-    """
-    Handles CRUD operations for users. Only authenticated users can view, update or delete a user,
-    but anyone can create a new account (POST action).
-    """
-
+    # Handles CRUD operations for users. Only authenticated users can view, update or delete a user,
+    # but anyone can create a new account (POST action).
     authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -43,9 +40,8 @@ class UserViewSet(viewsets.ModelViewSet):
 # PRODUCT FILTER
 # --------------------
 class ProductFilter(django_filters.FilterSet):
-    """
-    Filters for products based on price range, category, and stock status.
-    """
+
+    # Filters for products based on price range, category, and stock status.
 
     min_price = django_filters.NumberFilter(
         field_name="price", lookup_expr="gte"
@@ -69,10 +65,9 @@ class ProductFilter(django_filters.FilterSet):
 # PRODUCT VIEWSET
 # --------------------
 class ProductViewSet(viewsets.ModelViewSet):
-    """
-    Handles CRUD operations for products. Provides token-based authentication and allows read-only access to unauthenticated users.
-    Implements search functionality by product name and category.
-    """
+  
+    # Handles CRUD operations for products. Provides token-based authentication and allows read-only access to unauthenticated users.
+    # Implements search functionality by product name and category.
 
     authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
     permission_classes = [
@@ -91,10 +86,10 @@ class ProductViewSet(viewsets.ModelViewSet):
 # ORDER VIEWSET
 # --------------------
 class OrderViewSet(viewsets.ModelViewSet):
-    """
-    Handles CRUD operations for orders. Only authenticated users can view or interact with their orders.
-    Admin users can view all orders.
-    """
+
+    # Handles CRUD operations for orders. Only authenticated users can view or interact with their orders.
+    # Admin users can view all orders.
+    
     authentication_classes = [JWTAuthentication]  # Token-based authentication using JWT
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -112,9 +107,8 @@ class OrderViewSet(viewsets.ModelViewSet):
 # REVIEW VIEWSET
 # --------------------
 class ReviewViewSet(viewsets.ModelViewSet):
-    """
-    Handles CRUD operations for reviews. Only authenticated users can post a review, and the user who created the review is automatically assigned.
-    """
+
+    # Handles CRUD operations for reviews. Only authenticated users can post a review, and the user who created the review is automatically assigned.
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
