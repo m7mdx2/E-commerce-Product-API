@@ -171,7 +171,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         and prefetch_related for related objects.
         """
         if self.request.user.is_staff:
-            return Order.objects.select_related('user').all()
+            return Order.objects.select_related('user').all().order_by('id')
         return Order.objects.filter(user=self.request.user).select_related('user')
 
 
@@ -183,7 +183,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     Handles CRUD operations for reviews. 
     Only authenticated users can post a review, and the user who created the review is automatically assigned.
     """
-    queryset = Review.objects.all()  # Fetch all reviews
+    queryset = Review.objects.all().order_by('id')  # Fetch all reviews
     serializer_class = ReviewSerializer  # Serializer for converting review objects to and from JSON
     permission_classes = [
         IsAuthenticated  # Only authenticated users can perform actions
@@ -209,4 +209,4 @@ class CategoryViewSet(viewsets.ModelViewSet):
         """
         Return all categories. Additional filters can be added here if needed.
         """
-        return Category.objects.all()
+        return Category.objects.all().order_by('id')
