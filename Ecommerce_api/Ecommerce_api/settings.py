@@ -14,10 +14,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-your-default-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"  # Set DEBUG=False in production
+DEBUG = os.getenv("DEBUG", "False") == "False"  # Set DEBUG=False in production
 
 # Define the allowed hosts; update this with your domain for deployment
-ALLOWED_HOSTS = ["your-username.pythonanywhere.com", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["medob6.pythonanywhere.com", "127.0.0.1", "localhost"]
 
 # ---------------------------------------------------------------------
 # APPLICATION DEFINITION
