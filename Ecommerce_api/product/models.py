@@ -2,7 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-
+# this class for storig category instences with all data required
+class Category(models.Model):
+    name = models.CharField(max_length=100)  # name of category is a required field
+    def __str__(self):
+        return self.name
 # this tabel for storig product instences with all data required
 class Product(models.Model):
     name = models.CharField(
@@ -19,7 +23,7 @@ class Product(models.Model):
         default=0, blank=False, null=False
     )  # we set the default value to 0
     created_date = models.DateTimeField(auto_now_add=True)
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
+    category = models.ForeignKey('Category',related_name='products',on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -55,14 +59,7 @@ class Order(models.Model):
 
         super().save(*args, **kwargs)
 
-# this class for storig category instences with all data required
-class Category(models.Model):
-    name = models.CharField(
-        max_length=255
-    )  # name of category is a required field
 
-    def __str__(self):
-        return self.name
 # this class for storig review instences with all data required
 class Review(models.Model):
     product = models.ForeignKey(
