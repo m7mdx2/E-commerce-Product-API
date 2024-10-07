@@ -29,7 +29,7 @@ An API for managing products and categories in an e-commerce system. Built with 
 ## Installation
 1. Clone the repository:
     \`\`\`bash
-    git clone https://github.com/yourusername/ecommerce-product-api.git
+    git clone https://github.com/medob6/ecommerce-product-api.git
     \`\`\`
 
 2. Navigate to the project directory:
