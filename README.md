@@ -97,6 +97,3 @@ The API uses token-based authentication for secure access. Users need to authent
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue to discuss potential changes or improvements.
-
-## License
-This project is licensed under the MIT License.
